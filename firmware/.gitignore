@@ -1,0 +1,7 @@
+.pioenvs
+.piolibdeps
+CMakeListsPrivate.txt
+CMake*
+cmake-*
+.idea/
+

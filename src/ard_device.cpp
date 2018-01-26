@@ -39,5 +39,6 @@ namespace rover_drive {
         ROS_INFO_STREAM("writing " << microSeconds << "");
 #endif
         device.writeMany(packet, 4);
+        delete short_;
     }
 }

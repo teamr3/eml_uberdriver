@@ -5,12 +5,21 @@
 #include <Servo.h>
 #include <Arduino.h>
 #include <Wire.h>
+#include <Encoder.h>
+#include "constants.h"
 
 Servo servos[10];
+Encoder *encoders[10];
 uint8_t servoCount = 0;
 uint8_t lastName = 0;
+uint8_t encoderCount = 0;
+int32_t encoderResult = 0;
 
-const int ADDRESS = 0x30;
+int address;
+
+bool isLastNameActive = false;
+bool isEncoderResultActive = false;
+bool isLimitResultActive = false;
 
 uint8_t addServo(uint8_t pin) {
     servos[servoCount].attach((int)pin);
@@ -18,13 +27,10 @@ uint8_t addServo(uint8_t pin) {
     return servoCount - 1;
 }
 
-void resetServos() {
-    if (servoCount == 0) return;
-    for (int i = 0; i < servoCount; i++) {
-        servos[i].detach();
-    }
-    //free(servos);
-    servoCount = 0;
+uint8_t addEncoder(uint8_t pin1, uint8_t pin2) {
+    encoders[encoderCount] = new Encoder(pin1, pin2);
+    encoderCount += 1;
+    return encoderCount-1;
 }
 
 void setServo(uint8_t name, uint16_t micros) {
@@ -34,25 +40,35 @@ void setServo(uint8_t name, uint16_t micros) {
 }
 
 void onRecieve(int bytes) {
-    //Serial.println("I getting data");
     int func = Wire.read();
-    //Serial.println(func);
     if (bytes == 2 && func == 0x01) {
-       // Serial.println("Adding pin");
         lastName = addServo(static_cast<uint8_t>(Wire.read()));
-      //  Serial.println(lastName);
+        isLastNameActive = true;
     }
     else if (bytes == 4 && func == 0x02) {
-        Serial.println("Setting pin");
         uint8_t servo = static_cast<uint8_t>(Wire.read());
         uint16_t value;
         Wire.readBytes((char *)&value, 2);
-      //  Serial.print("serv "); Serial.print(servo); Serial.print(" val "); Serial.println(value);
         setServo(servo, value);
     }
     else if (bytes == 1 && func == 0x03) {
-        //Serial.println("Reset!");
-        resetServos();
+        REQUEST_EXTERNAL_RESET;
+    }
+    else if (bytes == 3 && func == 0x04) {
+        uint8_t left = static_cast<uint8_t>(Wire.read());
+        uint8_t right =static_cast<uint8_t>(Wire.read());
+
+        lastName = addEncoder(left, right);
+        isLastNameActive = true;
+    }
+    else if (bytes == 2 && func == 0x05) {
+        uint8_t encoder = static_cast<uint8_t>(Wire.read());
+        encoders[encoder]->write(0);
+    }
+    else if (bytes == 2 && func == 0x06) {
+        uint8_t encoder = static_cast<uint8_t>(Wire.read());
+        encoderResult = encoders[encoder]->read();
+        isEncoderResultActive = true;
     }
     else {
         bytes--;
@@ -64,20 +80,40 @@ void onRecieve(int bytes) {
 }
 
 void onRequest() {
-    //Serial.println("i need to send data");
-    Wire.write(lastName);
+    if (isLastNameActive) {
+        Wire.write(lastName);
+        isLastNameActive = false;
+    }
+    else if (isEncoderResultActive) {
+        Wire.write(reinterpret_cast<uint8_t *>(&encoderResult), sizeof(int32_t));
+        isEncoderResultActive = false;
+    }
+    else {
+        // aaaaaah we mucked it up
+        Wire.write(0x00);
+    }
+}
+
+void setAddress() {
+    pinMode(ADDRESS_PIN_1, INPUT);
+    pinMode(ADDRESS_PIN_2, INPUT);
+    pinMode(ADDRESS_PIN_3, INPUT);
+    pinMode(ADDRESS_PIN_4, INPUT);
+
+    address = ADDRESS_BASE;
+    address += digitalRead(ADDRESS_PIN_1);
+    address += digitalRead(ADDRESS_PIN_2) * 2;
+    address += digitalRead(ADDRESS_PIN_3) * 4;
+    address += digitalRead(ADDRESS_PIN_4) * 8;
 }
 
 void setup() {
-  //  Serial.begin(9600); //debugging
-    Serial.println("OK");
-    Wire.begin(ADDRESS);
+    setAddress();
+    Wire.begin(address);
     Wire.onRequest(onRequest);
     Wire.onReceive(onRecieve);
-   // Serial.println("I am running");
 }
 
 void loop() {
-    //delay(200); // yaaaay
-    //Serial.println("I am loop");
+    // i am loop
 }

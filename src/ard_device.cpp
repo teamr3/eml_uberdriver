@@ -4,7 +4,7 @@
 
 #include "../include/eml_uberdriver/ard_device.h"
 
-namespace rover_drive {
+namespace eml_uberdriver {
 
     // arduino protocol-ish
 
@@ -17,7 +17,7 @@ namespace rover_drive {
         this->device.writeOne(0x03); // reset
     }
 
-    void ARDevice::openPin(uint8_t pin) {
+    void ARDevice::openPinAsMotor(uint8_t pin) {
         uint8_t servoName = device.requestOne(new uint8_t[2] {0x01, pin}, 2);
         this->pinMap[pin] = servoName;
         this->lastValues[pin] = 0;
@@ -40,5 +40,13 @@ namespace rover_drive {
 #endif
         device.writeMany(packet, 4);
         delete short_;
+    }
+
+    ARDevice::~ARDevice() {
+        device.close_();
+    }
+
+    encoder_id_t ARDevice::openPinAsEncoder(uint8_t pin1, uint8_t pin2) {
+        return 0;
     }
 }

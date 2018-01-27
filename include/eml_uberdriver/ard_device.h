@@ -8,14 +8,22 @@
 #include <simpli2c/simpli2c.h>
 #include <map>
 
-namespace rover_drive {
+namespace eml_uberdriver {
+
+    typedef uint8_t encoder_id_t;
 
     class ARDevice {
     public:
         ARDevice(uint8_t busnum, uint8_t address);
+        ~ARDevice();
 
-        void openPin(uint8_t pin);
+        void openPinAsMotor(uint8_t pin);
         void writeMicroseconds(uint8_t pin, uint16_t microSeconds);
+
+        encoder_id_t openPinAsEncoder(uint8_t pin1, uint8_t pin2);
+        void resetEncoder(encoder_id_t encoder);
+        int32_t readEncoder(encoder_id_t encoder);
+
     private:
         simpli2c::Device device;
         std::map<uint8_t, uint8_t> pinMap;

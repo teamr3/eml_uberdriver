@@ -65,12 +65,12 @@ namespace eml_uberdriver {
 
 
     void ARDevice::resetEncoder(encoder_id_t encoder) {
-        this->device.writeMany(new uint8_t[] {0x05, encoder}, 2);
+        this->device.writeMany(new uint8_t[2] {0x05, encoder}, 2);
     }
 
     int32_t ARDevice::readEncoder(encoder_id_t encoder) {
         uint8_t resp[] = {0, 0, 0, 0};
-        this->device.requestMany(2, new uint8_t[] {0x06, encoder}, 4, resp);
-        return reinterpret_cast<int32_t>(simpli2c::bufferLong(resp)); // simpli2c only gives unsigned values, convert to signed
+        this->device.requestMany(2, new uint8_t[2] {0x06, encoder}, 4, resp);
+        return static_cast<int32_t>(simpli2c::bufferLong(resp)); // simpli2c only gives unsigned values, convert to signed
     }
 }

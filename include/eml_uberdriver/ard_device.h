@@ -11,6 +11,7 @@
 namespace eml_uberdriver {
 
     typedef uint8_t encoder_id_t;
+    class Encoder; // forward decl
 
     class ARDevice {
     public:
@@ -20,7 +21,9 @@ namespace eml_uberdriver {
         void openPinAsMotor(uint8_t pin);
         void writeMicroseconds(uint8_t pin, uint16_t microSeconds);
 
-        encoder_id_t openPinAsEncoder(uint8_t pin1, uint8_t pin2);
+        encoder_id_t openPinAsEncoderId(uint8_t pin1, uint8_t pin2);
+        Encoder openPinAsEncoder(uint8_t pin1, uint8_t pin2);
+
         void resetEncoder(encoder_id_t encoder);
         int32_t readEncoder(encoder_id_t encoder);
 

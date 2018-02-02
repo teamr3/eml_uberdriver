@@ -117,6 +117,7 @@ include_directories(${catkin_INCLUDE_DIRS})
 ## Declare a C++ library
 add_library(eml_uberdriver
   src/ard_device.cpp
+  src/encoder.cpp
 )
 
 ## Add cmake target dependencies of the library

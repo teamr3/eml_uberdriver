@@ -2,6 +2,7 @@
 // Created by matthew on 24/08/17.
 //
 
+#include <eml_uberdriver/encoder.h>
 #include "../include/eml_uberdriver/ard_device.h"
 
 namespace eml_uberdriver {
@@ -46,7 +47,30 @@ namespace eml_uberdriver {
         device.close_();
     }
 
-    encoder_id_t ARDevice::openPinAsEncoder(uint8_t pin1, uint8_t pin2) {
-        return 0;
+    encoder_id_t ARDevice::openPinAsEncoderId(uint8_t pin1, uint8_t pin2) {
+        uint8_t packet[] = {
+                0x04,
+                pin1,
+                pin2
+        };
+        return this->device.requestOne(packet, 3);
+    }
+
+    Encoder ARDevice::openPinAsEncoder(uint8_t pin1, uint8_t pin2) {
+        encoder_id_t enc = openPinAsEncoderId(pin1, pin2);
+        Encoder e = Encoder(this, enc);
+        return e;
+    }
+
+
+
+    void ARDevice::resetEncoder(encoder_id_t encoder) {
+        this->device.writeMany(new uint8_t[] {0x05, encoder}, 2);
+    }
+
+    int32_t ARDevice::readEncoder(encoder_id_t encoder) {
+        uint8_t resp[] = {0, 0, 0, 0};
+        this->device.requestMany(2, new uint8_t[] {0x06, encoder}, 4, resp);
+        return reinterpret_cast<int32_t>(simpli2c::bufferLong(resp)); // simpli2c only gives unsigned values, convert to signed
     }
 }

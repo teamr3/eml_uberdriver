@@ -28,7 +28,7 @@ API Documentation
 
     .. cpp:function:: eml_uberdriver::encoder_id_t eml_uberdriver::ARDevice::openPinAsEncoderId(uint8_t pin1, uint8_t pin2)
 
-        Opens *two* pins on the Due as an encoder, returning the **raw id** (see :doc:`the protocol documentation <protocol.rst> for more information) of this new encoder.
+        Opens *two* pins on the Due as an encoder, returning the **raw id** (see :doc:`the protocol documentation <protocol.rst>` for more information) of this new encoder.
 
         :param pin1: The first pin to open
         :param pin2: The second pin to open
@@ -61,6 +61,20 @@ API Documentation
         :param encoder: The **raw id** of the encoder to read
 
         :return: The number of ticks since the last reset of this encoder
+
+    .. cpp:function:: void eml_uberdriver::ARDevice::openPinAsLimitSwitch(uint8_t pin)
+
+        Opens a pin as a limit switch
+
+        :param pin: The pin to open
+
+    .. cpp:function:: bool eml_uberdriver::ARDevice::readLimitSwitch(uint8_t pin)
+
+        Checks if an open limit switch is pressed
+
+        :param pin: The pin of the limit switch to check
+
+        :return: If the limit switch is pressed
 
 .. cpp:class:: eml_uberdriver::Encoder
 

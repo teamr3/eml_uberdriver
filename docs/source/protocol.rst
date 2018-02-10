@@ -2,13 +2,22 @@
 I2C Protocol
 ============
 
+Overview
+--------
+
 The eml_uberdriver protocol is designed for Encoders, Motors and Limitswitches.
 
 The device is *not* register based, and instead works more like a UART protocol than anything else.
 
 In order to send commands to the device, one byte indicating the command type is sent, followed by the command payload (arguments)
 
-The commands are as follows:
+Terminology & Endianness
+------------------------
+
+In this chapter, the term RETURNS is used when the Due will give a value upon requesting (via I2C) AFTER the command returning
+something completes. The Due is a little-endian device, and so all integers (unless otherwise specified) should be sent as little-endian.
+
+Names are usually numbers used to refer to resources provided by the Due, instead of sending pins every single time.
 
 Commands
 --------
@@ -95,6 +104,36 @@ This command will return a *signed* 4-byte (32-bit) integer denoting the current
 
     Sending an encoder name not first acquired with command ``0x04`` will cause **undefined and potentially dangerous** behavior.
 
+``0x07`` - open limit switch
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This command opens a pin as a limit switch, format is: ::
+
+    0x07 0xPP
+Where ``PP`` is the pin as an unsigned byte to open as a limit switch.
+
+This command *does not* return a name, as limit switches *do not require them*. This is done
+to make the underlying firmware simpler.
+
+``0x08`` - read limit switch
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This command is used to read whether or not a limit switch is engaged, the format is this: ::
+
+    0x08 0xPP
+Where `PP` is an unsigned byte denoting which pin to read as a limit switch.
+
+.. danger::
+
+    Although the underlying implementation of this command usually just calls ``digitalRead``, that doesn't mean it's safe to just
+    send random values to the Due. Undefined behavior can happen if you do that.
+
+This command will return one unsigned byte, 0x00 if the limit switch is unengaged, and 0x01 if it is engaged.
+
+.. note::
+
+    The Due expects the switch to be wired with one end into the pin provided and one end into ground, as the Due contains its own
+    pullup resistors.
 
 Usage Examples
 --------------

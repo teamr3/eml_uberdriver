@@ -25,10 +25,12 @@ The Client Library is designed to be very simple, and only uses two classes. The
 
 Using it is very simple, simply construct one with two parameters: the i2c bus and address of the Due.
 
-There are 3 main functions:
+There are 5 main functions:
 
 * :cpp:func:`eml_uberdriver::ARDevice::openPinAsMotor`
 * :cpp:func:`eml_uberdriver::ARDevice::writeMicroseconds`
+* :cpp:func:`eml_uberdriver::ARDevice::openPinAsLimitSwitch`
+* :cpp:func:`eml_uberdriver::ARDevice::readLimitSwitch`
 * :cpp:func:`eml_uberdriver::ARDevice::openPinAsEncoder`
 
 .. warning::
@@ -38,6 +40,9 @@ There are 3 main functions:
 :cpp:func:`eml_uberdriver::ARDevice::openPinAsMotor` opens a pin on the Due as a motor, :cpp:func:`eml_uberdriver::ARDevice::writeMicroseconds`
 sets a value in microseconds for that motor (by pin), and :cpp:func:`eml_uberdriver::ARDevice::openPinAsEncoder` opens *two* digital pins
 for use as an encoder, returning an :cpp:class:`eml_uberdriver::Encoder` instance.
+
+:cpp:func:`eml_uberdriver::ARDevice::openPinAsLimitSwitch` opens a pin as a limit switch, similar to :cpp:func:`eml_uberdriver::ARDevice::openPinAsMotor`.
+After calling this function, using :cpp:func:`eml_uberdriver::ARDevice::readLimitSwitch` will tell you if the limit switch is engaged.
 
 Examples
 --------
@@ -88,3 +93,23 @@ The encoder API uses the :cpp:class:`eml_uberdriver::Encoder` class. This class 
     std::cout << "The encoder reads: " << e.encoderValue() << std::endl; // encoderValue() gives the current position of the encoder
 
 This example opens and reads an encoder on pins 2 and 3.
+
+Simple limit switches
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: cpp
+    :linenos:
+
+    // Open the arduino on address 0x30, bus 1.
+    // Using i2cdetect -y -q -a <busnum> can allow you to see what devices are on what buses
+    eml_uberdriver::ARDevice device(1, 0x30);
+
+    e.openPinAsLimitSwitch(9); // open pin 9 as a limit switch
+    if (e.readLimitSwitch(9)) {
+        std::cout << "ITS CONNECTED AAAAA!" << std::endl;
+    }
+    else {
+        std::cout << "nope its off all good" << std::endl;
+    }
+
+This example opens pin 9 as a limit switch and checks if it is pressed.

@@ -19,7 +19,7 @@ The supported hardware is as follows:
 
 * Motors over PWM
 * Two-wire encoders
-* Limit switches (standard switches)
+* Limit switches (standard switches, wired with one end to arduino and one end to ground)
 
 Setup
 -----

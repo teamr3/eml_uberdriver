@@ -1,2 +1,4 @@
-.idea/
+*.idea/*
 cmake-*
+docs/build
+docs/source/.idea/*

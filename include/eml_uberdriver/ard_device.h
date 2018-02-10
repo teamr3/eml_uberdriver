@@ -27,6 +27,9 @@ namespace eml_uberdriver {
         void resetEncoder(encoder_id_t encoder);
         int32_t readEncoder(encoder_id_t encoder);
 
+        void openPinAsLimitSwitch(uint8_t pin);
+        bool readLimitSwitch(uint8_t pin);
+
     private:
         simpli2c::Device device;
         std::map<uint8_t, uint8_t> pinMap;

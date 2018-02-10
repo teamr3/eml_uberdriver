@@ -73,4 +73,14 @@ namespace eml_uberdriver {
         this->device.requestMany(2, new uint8_t[2] {0x06, encoder}, 4, resp);
         return static_cast<int32_t>(simpli2c::bufferLong(resp)); // simpli2c only gives unsigned values, convert to signed
     }
+
+    void ARDevice::openPinAsLimitSwitch(uint8_t pin) {
+        this->device.writeMany(new uint8_t [2] {0x07, pin}, 2);
+    }
+
+    bool ARDevice::readLimitSwitch(uint8_t pin) {
+        return this->device.requestOne(new uint8_t [2] {0x08, pin}, 2) == 0x01;
+    }
+
+
 }

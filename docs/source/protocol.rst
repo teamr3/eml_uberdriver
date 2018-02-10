@@ -16,10 +16,10 @@ Commands
 ``0x01`` - open pin as motor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This command will open a servo on the arduino. It will return one byte indicating the name of this servo. The format looks like this: ::
+This command will open a servo on the Due. It will return one byte indicating the name of this servo. The format looks like this: ::
 
     0x01 0xPP
-Where ``PP`` is this pin number on the arduino.
+Where ``PP`` is this pin number on the Due.
 
 .. important::
 
@@ -42,11 +42,15 @@ Its format looks like this: ::
 ``0x03`` - reset
 ~~~~~~~~~~~~~~~~
 
-Sending this command on its own will reset the state of the arduino. All servo names and values are lost.
+Sending this command on its own will reset the state of the Due. All servo names and values are lost.
 
 .. note:
 
-    This command is usually implemented as a hardware reset on the arduino, so if devices connected to it are sensitive to that, be aware of it.
+    This command is usually implemented as a hardware reset on the Due, so if devices connected to it are sensitive to that, be aware of it.
+
+.. note::
+
+    This is usually called when the program starts and when it quits, to make sure the Due is in a blank state when it is running.
 
 ``0x04`` - open pins as encoder
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

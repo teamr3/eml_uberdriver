@@ -135,6 +135,35 @@ This command will return one unsigned byte, 0x00 if the limit switch is unengage
     The Due expects the switch to be wired with one end into the pin provided and one end into ground, as the Due contains its own
     pullup resistors.
 
+
+``0x09`` - create unipolar stepper motor
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This command is used to create a stepper (unipolar) from 3 pins: enable, direction and step. ::
+
+    0x09 0xEE 0xDD 0xSS
+
+Where ``EE`` is the enable pin, ``DD` is direction and ``SS`` is step.
+
+This command returns one unsigned byte denoting the name of the new stepper.
+
+.. note::
+
+    ``eml_uberdriver`` supports multiple kinds of steppers, but the only api difference is in the create call.
+
+.. warning::
+
+    The api for steppers is likely to change as the hardware requirements are more defined.
+
+``0x0A`` - step stepper
+~~~~~~~~~~~~~~~~~~~~~~~
+
+This command will step a stepper, its format is: ::
+
+    0x0A 0xNN 0xSS 0xSS
+
+Where ``NN`` is the name of the stepper, and ``SSSS`` is a *signed* 2-byte integer denoting how many steps and in which direction.
+
 Usage Examples
 --------------
 

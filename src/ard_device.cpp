@@ -82,5 +82,22 @@ namespace eml_uberdriver {
         return this->device.requestOne(new uint8_t [2] {0x08, pin}, 2) == 0x01;
     }
 
+    void ARDevice::stepStepper(stepper_id_t step, int16_t steps) {
+        uint8_t req[] = {0x0A, step, 0, 0};
+        uint8_t * short_ = simpli2c::shortBuffer(static_cast<uint16_t>(steps));
+        memcpy(req + 2, short_, 2);
+        delete short_;
+        this->device.writeMany(req, 2);
+    }
+
+    stepper_id_t ARDevice::openPinAsUnipolarStepper(uint8_t pinEnable, uint8_t pinDir, uint8_t pinStep) {
+        return device.requestOne(new uint8_t [4] {0x09, pinEnable, pinDir, pinStep}, 4); // todo: get actual pinout requirements
+    }
+
+    Stepper ARDevice::openPinAsStepper(uint8_t pinEnable, uint8_t pinDir, uint8_t pinStep) {
+        stepper_id_t s = openPinAsUnipolarStepper(pinEnable, pinDir, pinStep);
+        return Stepper(this, s);
+    }
+
 
 }

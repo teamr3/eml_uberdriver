@@ -7,6 +7,7 @@
 
 #include <simpli2c/simpli2c.h>
 #include <map>
+#include "stepper.h"
 
 namespace eml_uberdriver {
 
@@ -29,6 +30,11 @@ namespace eml_uberdriver {
 
         void openPinAsLimitSwitch(uint8_t pin);
         bool readLimitSwitch(uint8_t pin);
+
+        Stepper openPinAsStepper(uint8_t pinEnable, uint8_t pinDir, uint8_t pinStep);
+        stepper_id_t openPinAsUnipolarStepper(uint8_t pinEnable, uint8_t pinDir, uint8_t pinStep);
+
+        void stepStepper(stepper_id_t step, int16_t steps);
 
     private:
         simpli2c::Device device;

@@ -10,6 +10,7 @@
 namespace eml_uberdriver {
 
     typedef uint8_t stepper_id_t;
+    class ARDevice;
 
     class Stepper {
     friend class ARDevice;
@@ -19,7 +20,7 @@ namespace eml_uberdriver {
         stepper_id_t stepper_id;
         ARDevice *arDevice;
     public:
-        Stepper() = default;;
+        Stepper() = default;
         void step(int16_t steps);
     };
 

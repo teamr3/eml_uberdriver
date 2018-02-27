@@ -7,13 +7,17 @@
 #include <Wire.h>
 #include <Encoder.h>
 #include "constants.h"
+#include <A4988.h>
 
 Servo servos[10];
 Encoder *encoders[10];
+A4988 *steppers[10];
+
 uint8_t servoCount = 0;
 uint8_t lastName = 0;
 uint8_t encoderCount = 0;
 int32_t encoderResult = 0;
+uint8_t stepperCount = 0;
 
 int address;
 
@@ -31,6 +35,12 @@ uint8_t addEncoder(uint8_t pin1, uint8_t pin2) {
     encoders[encoderCount] = new Encoder(pin1, pin2);
     encoderCount += 1;
     return encoderCount-1;
+}
+
+uint8_t addStepper(uint8_t dir, uint8_t step, uint8_t en) {
+    steppers[stepperCount] = new A4988(200, dir, step, en);
+    stepperCount += 1;
+    return stepperCount-1;
 }
 
 void setServo(uint8_t name, uint16_t micros) {
@@ -69,6 +79,21 @@ void onRecieve(int bytes) {
         uint8_t encoder = static_cast<uint8_t>(Wire.read());
         encoderResult = encoders[encoder]->read();
         isEncoderResultActive = true;
+    }
+    else if (bytes == 4 && func == 0x09) {
+        uint8_t step =  static_cast<uint8_t>(Wire.read());
+        uint8_t enable= static_cast<uint8_t>(Wire.read());
+        uint8_t dir    =static_cast<uint8_t>(Wire.read());
+
+        lastName = addStepper(dir, step, enable);
+        isLastNameActive = true;
+    }
+    else if (bytes == 4 && func == 0x0A) {
+        uint8_t stepper = static_cast<uint8_t>(Wire.read());
+        int16_t steps;
+        Wire.readBytes(reinterpret_cast<char *>(&steps), 2);
+        steppers[stepper]->stop();
+        steppers[stepper]->startMove(steps);
     }
     else {
         bytes--;

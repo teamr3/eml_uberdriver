@@ -10,7 +10,7 @@
 #define VECTKEY_MASK   (0x0000ffffUL)
 #define AIRCR          (*(uint32_t*)0xe000ed0cUL) // fixed arch-defined address
 #define REQUEST_EXTERNAL_RESET (AIRCR=(AIRCR&VECTKEY_MASK)|VECTKEY|SYSRESETREQ)
-const int ADDRESS_BASE = 0x20;
+const int ADDRESS_BASE = 0x30;
 
 const int ADDRESS_PIN_1 = 1;
 const int ADDRESS_PIN_2 = 2;

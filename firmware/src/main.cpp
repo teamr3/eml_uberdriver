@@ -6,7 +6,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <Encoder.h>
-#include "constants.h"
+//#include "constants.h"
 #include <A4988.h>
 
 Servo servos[10];
@@ -62,7 +62,7 @@ void onRecieve(int bytes) {
         setServo(servo, value);
     }
     else if (bytes == 1 && func == 0x03) {
-        REQUEST_EXTERNAL_RESET;
+    //    REQUEST_EXTERNAL_RESET;
     }
     else if (bytes == 3 && func == 0x04) {
         uint8_t left = static_cast<uint8_t>(Wire.read());
@@ -119,7 +119,7 @@ void onRequest() {
     }
 }
 
-void setAddress() {
+void setAddress() {/*
     pinMode(ADDRESS_PIN_1, INPUT);
     pinMode(ADDRESS_PIN_2, INPUT);
     pinMode(ADDRESS_PIN_3, INPUT);
@@ -129,12 +129,12 @@ void setAddress() {
     address += digitalRead(ADDRESS_PIN_1);
     address += digitalRead(ADDRESS_PIN_2) * 2;
     address += digitalRead(ADDRESS_PIN_3) * 4;
-    address += digitalRead(ADDRESS_PIN_4) * 8;
+    address += digitalRead(ADDRESS_PIN_4) * 8;*/
 }
 
 void setup() {
     setAddress();
-    Wire.begin(address);
+    Wire.begin(0x30);
     Wire.onRequest(onRequest);
     Wire.onReceive(onRecieve);
 }

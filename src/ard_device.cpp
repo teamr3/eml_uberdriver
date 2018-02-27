@@ -15,7 +15,7 @@ namespace eml_uberdriver {
 
     ARDevice::ARDevice(uint8_t busnum, uint8_t address) : device(busnum, address), pinMap(), lastValues() {
         this->device.open_();
-        this->device.writeOne(0x03); // reset
+        //this->device.writeOne(0x03); // reset
     }
 
     void ARDevice::openPinAsMotor(uint8_t pin) {

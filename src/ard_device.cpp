@@ -19,7 +19,7 @@ namespace eml_uberdriver {
 
     bool ARDevice::tryOpen() {
         if (this->isOpen) return true;
-        return this->tryOpen();
+        return this->doOpen();
     }
 
     void ARDevice::openPinAsMotor(uint8_t pin) {

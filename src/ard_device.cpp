@@ -133,6 +133,14 @@ namespace eml_uberdriver {
             this->device.writeOne(0x03); // reset, then reopen as this causes the arduino to reset
 
             // todo: might break as writing 0x03 _will_ physically reset the entire arduino.
+                // fixme: spooky scary skeletons mean that if I write _something_ to the arduino (like 255, nop), it works?
+
+            try {
+                this->device.writeOne(0xFF);
+            }
+            catch (std::runtime_error &e) {
+                // idc
+            }
 
             this->lastValues.clear();
             this->pinMap.clear();

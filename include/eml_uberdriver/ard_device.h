@@ -27,11 +27,20 @@ namespace eml_uberdriver {
         void resetEncoder(encoder_id_t encoder);
         int32_t readEncoder(encoder_id_t encoder);
 
+        bool tryOpen();
+        bool isDisconnected();
+
     private:
+        bool doOpen();
+
+        bool isOpen = false;
+
         simpli2c::Device device;
         std::map<uint8_t, uint8_t> pinMap;
         std::map<uint8_t, uint16_t> lastValues;
     };
+
+
 
 }
 

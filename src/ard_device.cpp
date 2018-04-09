@@ -4,6 +4,7 @@
 
 #include <eml_uberdriver/encoder.h>
 #include "../include/eml_uberdriver/ard_device.h"
+#include "../../../../../../../../opt/ros/kinetic/include/ros/time.h"
 
 namespace eml_uberdriver {
 
@@ -14,63 +15,135 @@ namespace eml_uberdriver {
     // reset: 0x03
 
     ARDevice::ARDevice(uint8_t busnum, uint8_t address) : device(busnum, address), pinMap(), lastValues() {
-        this->device.open_();
-        this->device.writeOne(0x03); // reset
+        this->tryOpen();
+    }
+
+    bool ARDevice::tryOpen() {
+        if (this->isOpen) return true;
+        return this->tryOpen();
     }
 
     void ARDevice::openPinAsMotor(uint8_t pin) {
-        uint8_t servoName = device.requestOne(new uint8_t[2] {0x01, pin}, 2);
-        this->pinMap[pin] = servoName;
-        this->lastValues[pin] = 0;
+        if (!this->isDisconnected()) {
+            try {
+                uint8_t servoName = device.requestOne(new uint8_t[2]{0x01, pin}, 2);
+                this->pinMap[pin] = servoName;
+                this->lastValues[pin] = 0;
+            }
+            catch (std::runtime_error &e) {
+                this->isOpen = false;
+                this->device.close_();
+            }
+        }
     }
 
     void ARDevice::writeMicroseconds(uint8_t pin, uint16_t microSeconds) {
-        if (lastValues[pin] == microSeconds) return;
-        lastValues[pin] = microSeconds;
-        uint8_t packet[] = {
-                0x02,
-                this->pinMap[pin],
-                0x00,
-                0x00
-        };
-        uint8_t *short_ = simpli2c::shortBuffer(microSeconds);
-        packet[2] = short_[0];
-        packet[3] = short_[1];
+        if (!this->isDisconnected()) {
+            if (lastValues[pin] == microSeconds) return;
+            uint8_t packet[] = {
+                    0x02,
+                    this->pinMap[pin],
+                    0x00,
+                    0x00
+            };
+            uint8_t *short_ = simpli2c::shortBuffer(microSeconds);
+            packet[2] = short_[0];
+            packet[3] = short_[1];
 #ifdef DEBUG_PRINT_MICROSECONDS
-        ROS_INFO_STREAM("writing " << microSeconds << "");
+            ROS_INFO_STREAM("writing " << microSeconds << "");
 #endif
-        device.writeMany(packet, 4);
-        delete short_;
+            try {
+                device.writeMany(packet, 4);
+                lastValues[pin] = microSeconds;
+            }
+            catch (std::runtime_error &e) {
+                this->isOpen = false;
+                this->device.close_();
+            }
+            delete short_;
+        }
     }
 
     ARDevice::~ARDevice() {
-        device.close_();
+        if (!this->isDisconnected()) {
+            device.close_();
+        }
     }
 
     encoder_id_t ARDevice::openPinAsEncoderId(uint8_t pin1, uint8_t pin2) {
-        uint8_t packet[] = {
-                0x04,
-                pin1,
-                pin2
-        };
-        return this->device.requestOne(packet, 3);
+        if (!this->isDisconnected()) {
+            uint8_t packet[] = {
+                    0x04,
+                    pin1,
+                    pin2
+            };
+            try {
+                return this->device.requestOne(packet, 3);
+            }
+            catch (std::runtime_error &e) {
+                this->isOpen = false;
+                this->device.close_();
+            }
+        }
     }
 
     Encoder ARDevice::openPinAsEncoder(uint8_t pin1, uint8_t pin2) {
-        encoder_id_t enc = openPinAsEncoderId(pin1, pin2);
-        Encoder e = Encoder(this, enc);
-        return e;
+        if (!this->isDisconnected()) {
+            encoder_id_t enc = openPinAsEncoderId(pin1, pin2);
+            Encoder e = Encoder(this, enc);
+            return e;
+        }
     }
 
 
 
     void ARDevice::resetEncoder(encoder_id_t encoder) {
-        this->device.writeMany(new uint8_t[2] {0x05, encoder}, 2);
+        if (!this->isDisconnected()) {
+            try {
+                this->device.writeMany(new uint8_t[2]{0x05, encoder}, 2);
+            }
+            catch (std::runtime_error &e) {
+                this->isOpen = false;
+                this->device.close_();
+            }
+        }
     }
 
     int32_t ARDevice::readEncoder(encoder_id_t encoder) {
-        uint8_t resp[] = {0, 0, 0, 0};
-        this->device.requestMany(2, new uint8_t[2] {0x06, encoder}, 4, resp);
-        return static_cast<int32_t>(simpli2c::bufferLong(resp)); // simpli2c only gives unsigned values, convert to signed
+        if (!this->isDisconnected()) {
+            uint8_t resp[] = {0, 0, 0, 0};
+            try {
+                this->device.requestMany(2, new uint8_t[2]{0x06, encoder}, 4, resp);
+                return static_cast<int32_t>(simpli2c::bufferLong(
+                        resp)); // simpli2c only gives unsigned values, convert to signed
+            }
+            catch (std::runtime_error &e) {
+                this->isOpen = false;
+                this->device.close_();
+            }
+        }
+    }
+
+    bool ARDevice::isDisconnected() {
+        return !this->isOpen;
+    }
+
+    bool ARDevice::doOpen() {
+        try {
+            this->device.open_();
+            this->device.writeOne(0x03); // reset, then reopen as this causes the arduino to reset
+
+            // todo: might break as writing 0x03 _will_ physically reset the entire arduino.
+
+            this->lastValues.clear();
+            this->pinMap.clear();
+            this->isOpen = true;
+        }
+        catch (std::runtime_error &e) {
+            this->isOpen = false;
+            if (this->device.isOpen()) {
+                this->device.close_();
+            }
+        }
     }
 }

@@ -12,7 +12,7 @@
 #define REQUEST_EXTERNAL_RESET (AIRCR=(AIRCR&VECTKEY_MASK)|VECTKEY|SYSRESETREQ)
 const int ADDRESS_BASE = 0x20;
 
-const int ADDRESS_PIN_1 = 1;
+const int ADDRESS_PIN_1 = 5;
 const int ADDRESS_PIN_2 = 2;
 const int ADDRESS_PIN_3 = 3;
 const int ADDRESS_PIN_4 = 4;

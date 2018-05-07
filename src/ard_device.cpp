@@ -131,15 +131,20 @@ namespace eml_uberdriver {
         try {
             this->device.open_();
             this->device.writeOne(0x03); // reset, then reopen as this causes the arduino to reset
+            this->device.close_();
 
             // todo: might break as writing 0x03 _will_ physically reset the entire arduino.
                 // fixme: spooky scary skeletons mean that if I write _something_ to the arduino (like 255, nop), it works?
-
-            try {
-                this->device.writeOne(0xFF);
-            }
-            catch (std::runtime_error &e) {
-                // idc
+            for (;;) {
+                try {
+                    this->device.open_();
+                    this->device.writeOne(0xFF);
+                    break;
+                }
+                catch (std::runtime_error &e) {
+                    this->device.close_();
+                    // failed, keep trying
+                }
             }
 
             this->lastValues.clear();

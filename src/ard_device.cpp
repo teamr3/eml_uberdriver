@@ -157,5 +157,6 @@ namespace eml_uberdriver {
                 this->device.close_();
             }
         }
+        return this->isOpen;
     }
 }
